@@ -83,7 +83,7 @@ def train():
     return
 
   #This is needed for jupyter notebooks, if i'm not mistaken
-  sess = tf.InteractiveSession()
+  sess = tf.Session()
 
 
   ###### Definition of functions of layers which will be used in this model ######
@@ -194,7 +194,6 @@ def train():
 
       tf.summary.scalar('cross_entropy', tf.reduce_mean(cross_entropy))
     
-      print(tf.trainable_variables())
       # Optimizer definition (keep ADAM)
       with tf.name_scope('train'):
         train_step = tf.train.AdamOptimizer(FLAGS.learning_rate).minimize(cross_entropy)
