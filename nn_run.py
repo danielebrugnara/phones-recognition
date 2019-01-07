@@ -88,6 +88,11 @@ def train():
 
   ###### Definition of functions of layers which will be used in this model ######
   
+  # Dropout layer
+  def drp_layer(input_tensor, layer_name):
+    dropped = tf.nn.dropout(input_tensor, keep_prob, name=layer_name)
+    return dropped
+
   # Simple fully connected layer
   def FC_layer(input_tensor, output_dim, layer_name, act=tf.nn.relu):
     output_tensor = tf.layers.dense(input_tensor, output_dim, name=layer_name, activation=act)
@@ -99,9 +104,11 @@ def train():
       fc_layers = []
       layer=input_tensor
       for i in range(n_layers):
-          name = "%s_%s" % (layer_name, i)
-          layer = FC_layer(layer, n_neurons, name, act=act)
-          fc_layers.append(layer)
+          name = '%s_%s' % (layer_name, i)
+          with tf.name_scope(name):
+            layer = FC_layer(layer, n_neurons, 'FC_%s' % name, act=act)
+            layer = drp_layer(layer, 'drop_%s' % name)
+            fc_layers.append(layer)
       return fc_layers[n_layers-1]
 
   # Simple LSTM layer
@@ -112,9 +119,7 @@ def train():
     return outputs, states
 
   # Dropout layer
-  def drp_layer(input_tensor, layer_name):
-    dropped = tf.nn.dropout(input_tensor, keep_prob, name=layer_name)
-    return dropped
+
 
   # Multi layered LSTM
   def MultiLSTM_layer(input_tensor, subsequence_length, n_neurons, n_layers, initial_state, keep_prob):
@@ -139,7 +144,7 @@ def train():
       keep_prob = tf.placeholder(tf.float32, name='keep_prob')
       tf.summary.scalar('keep_probability', keep_prob)
       
-      fc_net = MultiFC_layer(X, n_neurons, n_fc_layers, 'FC')          
+      fc_net = MultiFC_layer(X, n_neurons, n_fc_layers, 'hidden')          
     
       # Output layer, activation identity
       y = FC_layer(fc_net, n_class, 'output_FC', act=tf.identity)
